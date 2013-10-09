@@ -30,7 +30,9 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.classifier.naivebayes.BayesUtils;
 import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
 import org.apache.mahout.classifier.naivebayes.StandardNaiveBayesClassifier;
@@ -39,7 +41,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.apache.mahout.vectorizer.TFIDF;
 
 import com.google.common.collect.ConcurrentHashMultiset;
@@ -93,13 +94,13 @@ public class Classifier {
 
 		
 		// analyzer used to extract word from tweet
-		Analyzer analyzer = new DefaultAnalyzer();
+		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_43);
 		
 		int labelCount = labels.size();
 		int documentCount = documentFrequency.get(-1).intValue();
 		
-		System.out.println("Number of labels: " + labelCount);
-		System.out.println("Number of documents in training set: " + documentCount);
+//		System.out.println("Number of labels: " + labelCount);
+//		System.out.println("Number of documents in training set: " + documentCount);
 //		BufferedReader reader = new BufferedReader(new FileReader(tweetsPath));
 //		while(true) {
 //			String line = reader.readLine();
@@ -112,12 +113,12 @@ public class Classifier {
 //			String tweet = tokens[1];
 
 //			System.out.println("Tweet: " + tweetId + "\t" + tweet);
-			System.out.println("Tweet: " + tweetsPath);
+//			System.out.println("Tweet: " + tweetsPath);
 
 			Multiset<String> words = ConcurrentHashMultiset.create();
 			
 			// extract words from tweet
-			TokenStream ts = analyzer.reusableTokenStream("text", new StringReader(tweetsPath));
+			TokenStream ts = analyzer.tokenStream("text", new StringReader(tweetsPath));
 			CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);
 			ts.reset();
 			int wordCount = 0;
@@ -150,16 +151,16 @@ public class Classifier {
 			Vector resultVector = classifier.classifyFull(vector);
 			double bestScore = -Double.MAX_VALUE;
 			int bestCategoryId = -1;
-			for(Element element: resultVector) {
+			for(Element element: resultVector.all()) {
 				int categoryId = element.index();
 				double score = element.get();
 				if (score > bestScore) {
 					bestScore = score;
 					bestCategoryId = categoryId;
 				}
-				System.out.print("  " + labels.get(categoryId) + ": " + score);
+//				System.out.print("  " + labels.get(categoryId) + ": " + score);
 			}
-			System.out.println(" => " + labels.get(bestCategoryId));
+//			System.out.println(" => " + labels.get(bestCategoryId));
 //		}
 			return labels.get(bestCategoryId);
 	}

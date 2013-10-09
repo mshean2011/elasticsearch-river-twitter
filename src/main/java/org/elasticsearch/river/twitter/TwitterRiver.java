@@ -460,7 +460,7 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
                         builder.field("created_at", status.getCreatedAt());
                         builder.field("source", status.getSource());
                         builder.field("truncated", status.isTruncated());
-                        builder.field("sentiment", Classifier.classify("/root/mahout-naive-bayes-example/local/model","/root/mahout-naive-bayes-example/local/labelindex","/root/mahout-naive-bayes-example/local/dictionary.file-0","/root/mahout-naive-bayes-example/local/df-count",status.getText()));
+                        builder.field("sentiment", Classifier.classify("/tmp/local/model","/tmp/local/labelindex","/tmp/local/dictionary.file-0","/tmp/local/df-count",status.getText()));
 
                         if (status.getUserMentionEntities() != null) {
                             builder.startArray("mention");
