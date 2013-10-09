@@ -67,7 +67,7 @@ public class Classifier {
 		return documentFrequency;
 	}
 	
-	public static String classify(String modelPath, String labelIndexPath, String dictionaryPath, String documentFrequencyPath, String text) throws IOException {
+	public static String classify(StandardNaiveBayesClassifier classifier, Map<Integer, String> labels, Map<String, Integer> dictionary, Map<Integer, Long> documentFrequency, String text) throws IOException {
 //	public static void main(String[] args) throws Exception {
 //		if (args.length < 5) {
 //			System.out.println("Arguments: [model] [label index] [dictionnary] [document frequency] [tweet file]");
@@ -79,19 +79,12 @@ public class Classifier {
 //		String documentFrequencyPath = args[3];
 //		String tweetsPath = args[4];
 		String tweetsPath = text;
-		
-		Configuration configuration = new Configuration();
 
 		// model is a matrix (wordId, labelId) => probability score
-		NaiveBayesModel model = NaiveBayesModel.materialize(new Path(modelPath), configuration);
 		
-		StandardNaiveBayesClassifier classifier = new StandardNaiveBayesClassifier(model);
+		//StandardNaiveBayesClassifier classifier = new StandardNaiveBayesClassifier(model);
 
 		// labels is a map label => classId
-		Map<Integer, String> labels = BayesUtils.readLabelIndex(configuration, new Path(labelIndexPath));
-		Map<String, Integer> dictionary = readDictionnary(configuration, new Path(dictionaryPath));
-		Map<Integer, Long> documentFrequency = readDocumentFrequency(configuration, new Path(documentFrequencyPath));
-
 		
 		// analyzer used to extract word from tweet
 		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_43);

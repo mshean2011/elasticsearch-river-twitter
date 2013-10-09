@@ -19,6 +19,11 @@
 
 package org.elasticsearch.river.twitter;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.mahout.classifier.naivebayes.BayesUtils;
+import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
+import org.apache.mahout.classifier.naivebayes.StandardNaiveBayesClassifier;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -45,6 +50,7 @@ import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,6 +97,24 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
     private volatile BulkRequestBuilder currentRequest;
 
     private volatile boolean closed = false;
+    
+    
+	String modelPath = "/tmp/local/model";
+	String labelIndexPath = "/tmp/local/labelindex";
+	String dictionaryPath = "/tmp/local/dictionary.file-0";
+	String documentFrequencyPath = "/tmp/local/df-count";
+	
+	Configuration configuration = new Configuration();
+
+	// model is a matrix (wordId, labelId) => probability score
+	NaiveBayesModel model;
+	
+	StandardNaiveBayesClassifier classifier;
+
+	// labels is a map label => classId
+	Map<Integer, String> labels = BayesUtils.readLabelIndex(configuration, new Path(labelIndexPath));
+	Map<String, Integer> dictionary = Classifier.readDictionnary(configuration, new Path(dictionaryPath));
+	Map<Integer, Long> documentFrequency = Classifier.readDocumentFrequency(configuration, new Path(documentFrequencyPath));
 
     @SuppressWarnings({"unchecked"})
     @Inject
@@ -274,6 +298,16 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
         }
 
         stream = buildTwitterStream();
+        
+        // mahout stuff
+    	try {
+			model = NaiveBayesModel.materialize(new Path(modelPath), configuration);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	classifier = new StandardNaiveBayesClassifier(model);
     }
 
     /**
@@ -460,7 +494,9 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
                         builder.field("created_at", status.getCreatedAt());
                         builder.field("source", status.getSource());
                         builder.field("truncated", status.isTruncated());
-                        builder.field("sentiment", Classifier.classify("/tmp/local/model","/tmp/local/labelindex","/tmp/local/dictionary.file-0","/tmp/local/df-count",status.getText()));
+                        String sentiment = Classifier.classify(classifier, labels, dictionary, documentFrequency, status.getText());
+                        builder.field("sentiment", sentiment);
+                        //System.out.println(status.getText() + " : " + sentiment);
 
                         if (status.getUserMentionEntities() != null) {
                             builder.startArray("mention");
