@@ -494,6 +494,7 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
                         builder.field("created_at", status.getCreatedAt());
                         builder.field("source", status.getSource());
                         builder.field("truncated", status.isTruncated());
+                        builder.field("id",status.getId());
                         String sentiment = Classifier.classify(classifier, labels, dictionary, documentFrequency, status.getText());
                         builder.field("sentiment", sentiment);
                         //System.out.println(status.getText() + " : " + sentiment);
