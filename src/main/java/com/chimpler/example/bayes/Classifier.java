@@ -155,6 +155,7 @@ public class Classifier {
 			}
 //			System.out.println(" => " + labels.get(bestCategoryId));
 //		}
+			analyzer.close();
 			return labels.get(bestCategoryId);
 	}
 }
