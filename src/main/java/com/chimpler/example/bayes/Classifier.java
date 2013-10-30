@@ -33,6 +33,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.classifier.naivebayes.StandardNaiveBayesClassifier;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -56,8 +58,9 @@ public class Classifier {
 	}
 
 	public static Map<Integer, Long> readDocumentFrequency(Configuration conf, Path documentFrequencyPath) {
+		Path filesPattern = new Path(documentFrequencyPath, "part-*");
 		Map<Integer, Long> documentFrequency = new HashMap<Integer, Long>();
-		for (Pair<IntWritable, LongWritable> pair : new SequenceFileIterable<IntWritable, LongWritable>(documentFrequencyPath, true, conf)) {
+		for (Pair<IntWritable, LongWritable> pair : new SequenceFileDirIterable<IntWritable, LongWritable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
 			documentFrequency.put(pair.getFirst().get(), pair.getSecond().get());
 		}
 		return documentFrequency;
