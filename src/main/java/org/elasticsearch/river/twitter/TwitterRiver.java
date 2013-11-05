@@ -508,6 +508,8 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
                                 builder.field("screen_name", user.getScreenName());
                                 builder.field("start", user.getStart());
                                 builder.field("end", user.getEnd());
+                                builder.field("tweet_link", "https://twitter.com/" + user.getScreenName() + "/status/" + status.getId());
+                                //System.out.println("https://twitter.com/" + user.getScreenName() + "/status/" + status.getId());
                                 builder.endObject();
                             }
                             builder.endArray();
