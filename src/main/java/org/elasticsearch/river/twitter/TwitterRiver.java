@@ -494,7 +494,9 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
                         builder.field("created_at", status.getCreatedAt());
                         builder.field("source", status.getSource());
                         builder.field("truncated", status.isTruncated());
-                        builder.field("id",status.getId());
+                        builder.field("status_id",status.getId());
+                        builder.field("tweet_link", "https://twitter.com/" + status.getUser().getScreenName() + "/status/" + status.getId());
+                        //System.out.println("https://twitter.com/" + user.getScreenName() + "/status/" + status.getId());
                         String sentiment = Classifier.classify(classifier, labels, dictionary, documentFrequency, status.getText());
                         builder.field("sentiment", sentiment);
                         //System.out.println(status.getText() + " : " + sentiment);
@@ -602,8 +604,6 @@ public class TwitterRiver extends AbstractRiverComponent implements River {
                         builder.field("description", status.getUser().getDescription());
                         builder.field("profile_image_url", status.getUser().getProfileImageURL());
                         builder.field("profile_image_url_https", status.getUser().getProfileImageURLHttps());
-                        builder.field("tweet_link", "https://twitter.com/" + status.getUser().getScreenName() + "/status/" + status.getId());
-                        //System.out.println("https://twitter.com/" + user.getScreenName() + "/status/" + status.getId());
 
                         builder.endObject();
 
